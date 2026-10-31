@@ -1,0 +1,11 @@
+{
+  "outputDir": "/tmp/opencode/pw-output",
+  "browser": {
+    "browserName": "chromium",
+    "launchOptions": {
+      "executablePath": "/usr/bin/chromium",
+      "headless": true,
+      "args": ["--no-sandbox", "--disable-dev-shm-usage"]
+    }
+  }
+}

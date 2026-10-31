@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0b0f0c" />
+<title>Minecraft: Block Brawl</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%235d9c3c'/%3E%3Crect x='2' y='2' width='5' height='5' fill='%2384c95a'/%3E%3Crect x='9' y='2' width='5' height='5' fill='%23427a2b'/%3E%3Crect x='2' y='9' width='5' height='5' fill='%23427a2b'/%3E%3Crect x='9' y='9' width='5' height='5' fill='%2384c95a'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+<div id="app">
+  <div id="frame">
+    <canvas id="game" width="480" height="270" aria-label="Minecraft Block Brawl game canvas"></canvas>
+
+    <div id="hud" class="hidden" aria-hidden="true">
+      <div class="hud-top">
+        <div class="fighter-hud p1">
+          <div class="fh-row">
+            <div class="fh-name">STEVE</div>
+            <div class="fh-tag">P1</div>
+          </div>
+          <div class="hp-track"><div class="hp-ghost"></div><div class="hp-fill"></div></div>
+          <div class="energy-track"><div class="energy-fill"></div><div class="energy-ticks"></div></div>
+          <div class="fh-meta">
+            <div class="pips"></div>
+            <div class="status-row"></div>
+            <div class="build-row"></div>
+          </div>
+        </div>
+
+        <div class="hud-center">
+          <div class="round-label">ROUND 1</div>
+          <div class="timer">99</div>
+          <div class="win-pips"><span></span><span></span></div>
+        </div>
+
+        <div class="fighter-hud p2">
+          <div class="fh-row">
+            <div class="fh-tag">CPU</div>
+            <div class="fh-name">HEROBRINE</div>
+          </div>
+          <div class="hp-track"><div class="hp-ghost"></div><div class="hp-fill"></div></div>
+          <div class="energy-track"><div class="energy-fill"></div><div class="energy-ticks"></div></div>
+          <div class="fh-meta">
+            <div class="build-row"></div>
+            <div class="status-row"></div>
+            <div class="pips"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="combo-popup" class="combo-popup"><span class="combo-num">0</span><span class="combo-label">HIT COMBO</span><span class="combo-name"></span></div>
+      <div id="announcer" class="announcer"><div class="announce-big"></div><div class="announce-small"></div></div>
+      <div id="boss-phase" class="boss-phase hidden"></div>
+      <div id="hitboxes-note" class="hitboxes-note hidden">HITBOXES: ON</div>
+      <div id="finish-prompt" class="finish-prompt hidden">FINISH THEM<br><span>PRESS U</span></div>
+    </div>
+
+    <div id="flash" class="flash"></div>
+    <div id="vignette" class="vignette"></div>
+  </div>
+
+  <div id="screens"></div>
+  <div id="overlay"></div>
+  <div id="touch-controls" class="hidden" aria-hidden="true">
+    <div class="touch-dpad">
+      <button class="tbtn tleft" data-action="left" aria-label="Move left">◀</button>
+      <button class="tbtn tup" data-action="jump" aria-label="Jump">▲</button>
+      <button class="tbtn tright" data-action="right" aria-label="Move right">▶</button>
+      <button class="tbtn tdown" data-action="crouch" aria-label="Crouch">▼</button>
+    </div>
+    <div class="touch-actions">
+      <button class="tbtn act ult" data-action="ultimate" aria-label="Ultimate">ULT</button>
+      <button class="tbtn act special" data-action="special" aria-label="Special">SP</button>
+      <button class="tbtn act block" data-action="block" aria-label="Block">BLK</button>
+      <button class="tbtn act build" data-action="build" aria-label="Build">BLD</button>
+      <button class="tbtn act heavy" data-action="heavy" aria-label="Heavy attack">HEAVY</button>
+      <button class="tbtn act light" data-action="light" aria-label="Light attack">HIT</button>
+      <button class="tbtn act finish hidden" data-action="finisher" aria-label="Finisher">FINISH</button>
+      <button class="tbtn act pause" data-action="pause" aria-label="Pause">II</button>
+    </div>
+  </div>
+  <div id="toast" class="toast"></div>
+</div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
