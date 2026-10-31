@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0b0d12" />
+<title>Minecraft: Block Brawl</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div id="app">
+  <canvas id="game" width="960" height="540" aria-label="Minecraft Block Brawl game canvas"></canvas>
+  <div id="crt"></div>
+
+  <!-- ===================== FIGHT HUD ===================== -->
+  <div id="hud" class="hidden">
+    <div class="hud-top">
+      <div class="fighter-hud p1">
+        <div class="hud-name-row"><span class="hud-name" id="p1-name">STEVE</span><span class="hud-style" id="p1-style">BALANCED</span></div>
+        <div class="bar health"><div class="bar-chip" id="p1-chip"></div><div class="bar-fill" id="p1-health"></div><span class="bar-num" id="p1-hpnum">1000</span></div>
+        <div class="bar guard"><div class="bar-fill" id="p1-guard"></div></div>
+        <div class="bar energy"><div class="bar-fill" id="p1-energy"></div><span class="bar-label">ULT</span></div>
+        <div class="pips" id="p1-pips"><i></i><i></i></div>
+      </div>
+      <div class="round-core">
+        <div class="timer" id="timer">99</div>
+        <div class="round-label" id="round-label">ROUND 1</div>
+        <div class="match-label" id="match-label">BEST OF 3</div>
+      </div>
+      <div class="fighter-hud p2">
+        <div class="hud-name-row"><span class="hud-style" id="p2-style">SECRET</span><span class="hud-name" id="p2-name">HEROBRINE</span></div>
+        <div class="bar health"><div class="bar-chip" id="p2-chip"></div><div class="bar-fill" id="p2-health"></div><span class="bar-num" id="p2-hpnum">1000</span></div>
+        <div class="bar guard"><div class="bar-fill" id="p2-guard"></div></div>
+        <div class="bar energy"><div class="bar-fill" id="p2-energy"></div><span class="bar-label">ULT</span></div>
+        <div class="pips" id="p2-pips"><i></i><i></i></div>
+      </div>
+    </div>
+    <div id="boss-wrap" class="hidden">
+      <div class="boss-label" id="boss-label">THE WITHER</div>
+      <div class="bar boss-health"><div class="bar-chip" id="boss-chip"></div><div class="bar-fill" id="boss-health"></div></div>
+      <div class="boss-phase" id="boss-phase">PHASE I</div>
+    </div>
+    <div id="combo-p1" class="combo hidden"><b>0</b><span>HIT COMBO</span></div>
+    <div id="combo-p2" class="combo hidden"><b>0</b><span>HIT COMBO</span></div>
+    <div id="announce" class="announce hidden"></div>
+    <div id="move-toast" class="move-toast hidden"></div>
+    <div id="build-info" class="build-info hidden"></div>
+  </div>
+
+  <!-- ===================== MAIN MENU ===================== -->
+  <section id="screen-main" class="screen">
+    <div class="menu-sky"></div>
+    <div class="main-inner">
+      <div class="logo">
+        <div class="logo-small">MINECRAFT</div>
+        <h1 class="logo-big">BLOCK<span>BRAWL</span></h1>
+        <div class="logo-tag">THE OVERWORLD'S ULTIMATE FIGHTING TOURNAMENT</div>
+      </div>
+      <div class="menu-grid">
+        <div class="menu-col">
+          <button class="btn btn-hero" id="btn-quick">Play</button>
+          <button class="btn" data-mode="versus">Versus <small>LOCAL 2P</small></button>
+          <button class="btn" data-mode="arcade">Arcade <small>LADDER</small></button>
+          <button class="btn" data-mode="story">Story Mode <small>5 CHAPTERS</small></button>
+        </div>
+        <div class="menu-col">
+          <button class="btn" data-mode="training">Training Mode</button>
+          <button class="btn" data-mode="survival">Survival <small>ENDLESS</small></button>
+          <button class="btn" id="btn-fighters">Fighters <small>9 + BOSSES</small></button>
+          <button class="btn" id="btn-settings">Settings</button>
+        </div>
+      </div>
+      <div class="main-foot">
+        <div class="foot-controls">
+          <span><b>MOVE</b> A / D</span><span><b>JUMP</b> W</span><span><b>CROUCH</b> S</span><span><b>BLOCK</b> I</span>
+          <span><b>LIGHT</b> J</span><span><b>HEAVY</b> K</span><span><b>SPECIAL</b> L</span><span><b>ULTIMATE</b> SPACE</span><span><b>BUILD</b> B</span>
+        </div>
+        <div class="foot-note">FAN GAME · NOT AFFILIATED WITH MOJANG · v1.0</div>
+      </div>
+    </div>
+    <div class="corner-badge" id="unlock-badge">SECRET FIGHTER UNLOCKED</div>
+  </section>
+
+  <!-- ===================== MODE SELECT ===================== -->
+  <section id="screen-modes" class="screen hidden">
+    <div class="panel wide">
+      <div class="panel-head"><h2>CHOOSE YOUR BATTLE</h2><button class="btn btn-ghost btn-back" data-back="main">BACK</button></div>
+      <div class="mode-cards">
+        <button class="mode-card" data-mode="versus">
+          <div class="mode-icon">⚔</div><h3>VERSUS</h3><p>Local two-player brawl. Share the keyboard and settle it.</p><span>2 PLAYERS</span>
+        </button>
+        <button class="mode-card" data-mode="arcade">
+          <div class="mode-icon">★</div><h3>ARCADE</h3><p>Fight the ladder, then face The Wither and the Ender Dragon.</p><span>6 BATTLES</span>
+        </button>
+        <button class="mode-card" data-mode="story">
+          <div class="mode-icon">▤</div><h3>STORY</h3><p>Steve and Alex investigate a corruption devouring the dimensions.</p><span>5 CHAPTERS</span>
+        </button>
+        <button class="mode-card" data-mode="training">
+          <div class="mode-icon">◎</div><h3>TRAINING</h3><p>Infinite energy, no damage, and a combo counter.</p><span>NO PRESSURE</span>
+        </button>
+        <button class="mode-card" data-mode="survival">
+          <div class="mode-icon">☠</div><h3>SURVIVAL</h3><p>Endless waves. Every fifth wave unleashes a boss.</p><span>ENDLESS</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CHARACTER SELECT ===================== -->
+  <section id="screen-select" class="screen hidden">
+    <div class="select-head">
+      <div class="select-title"><span id="select-mode-label">VERSUS</span><h2>SELECT YOUR FIGHTER</h2></div>
+      <div class="select-step" id="select-step">PLAYER 1 · CHOOSE</div>
+      <button class="btn btn-ghost" id="btn-select-back">BACK</button>
+    </div>
+    <div class="select-body">
+      <div class="roster" id="roster"></div>
+      <aside class="fighter-panel">
+        <canvas id="preview" width="300" height="250"></canvas>
+        <div class="preview-name" id="preview-name">STEVE</div>
+        <div class="preview-title" id="preview-title">THE BLOCKBORN BALANCED BLADE</div>
+        <div class="preview-style" id="preview-style">BALANCED · SWORD / AXE / BOW</div>
+        <div class="stat-list" id="stat-list"></div>
+        <div class="preview-moves" id="preview-moves"></div>
+        <button class="btn btn-hero" id="btn-confirm">CONFIRM FIGHTER</button>
+        <div class="preview-hint" id="preview-hint">P1: CLICK A FIGHTER · A/D + ENTER ALSO WORK</div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== STAGE SELECT ===================== -->
+  <section id="screen-stage" class="screen hidden">
+    <div class="panel wide">
+      <div class="panel-head"><h2>CHOOSE YOUR ARENA</h2><button class="btn btn-ghost btn-back" id="btn-stage-back">BACK</button></div>
+      <div class="stage-grid" id="stage-grid"></div>
+      <div class="stage-foot"><span id="stage-desc">A quiet village hiding a growing corruption.</span><span class="blink">SELECT AN ARENA</span></div>
+    </div>
+  </section>
+
+  <!-- ===================== SETTINGS ===================== -->
+  <section id="screen-settings" class="screen hidden">
+    <div class="panel settings-panel">
+      <div class="panel-head"><h2>SETTINGS</h2><button class="btn btn-ghost" data-back="main">BACK</button></div>
+      <div class="setting-row"><label>AI DIFFICULTY</label><div class="seg" id="set-difficulty"><button data-v="easy">EASY</button><button data-v="normal">NORMAL</button><button data-v="hard">HARD</button></div></div>
+      <div class="setting-row"><label>MUSIC VOLUME</label><input type="range" id="set-music" min="0" max="100" value="55" /></div>
+      <div class="setting-row"><label>SOUND EFFECTS</label><input type="range" id="set-sfx" min="0" max="100" value="80" /></div>
+      <div class="setting-row"><label>SCREEN SHAKE</label><div class="seg" id="set-shake"><button data-v="on">ON</button><button data-v="off">OFF</button></div></div>
+      <div class="setting-row"><label>HIT SPARKS</label><div class="seg" id="set-sparks"><button data-v="on">ON</button><button data-v="off">OFF</button></div></div>
+      <div class="setting-row"><label>MOBILE CONTROLS</label><div class="seg" id="set-touch"><button data-v="auto">AUTO</button><button data-v="on">ALWAYS</button><button data-v="off">OFF</button></div></div>
+      <div class="setting-row"><label>ROUND TIME</label><div class="seg" id="set-roundtime"><button data-v="60">60s</button><button data-v="99">99s</button></div></div>
+      <div class="settings-help">
+        <h3>CONTROLS</h3>
+        <div class="keys-grid">
+          <div><b>P1</b> A/D move · W jump · S crouch · I block · J light · K heavy · L special · SPACE ultimate · B build</div>
+          <div><b>P2</b> ←/→ move · ↑ jump · ↓ crouch · 4 block · 1 light · 2 heavy · 3 special · 5 ultimate · 6 build</div>
+          <div><b>SPECIALS</b> L (neutral), L + forward, L + back. Hold down for low variants where available.</div>
+          <div><b>BUILDING</b> B places a barrier · hold S + B places a platform. 3 builds per round. Structures expire.</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost" id="btn-reset-save">RESET PROGRESS</button>
+    </div>
+  </section>
+
+  <!-- ===================== STORY / CUTSCENE ===================== -->
+  <section id="screen-story" class="screen hidden">
+    <div class="story-scene">
+      <canvas id="story-canvas" width="960" height="400"></canvas>
+      <div class="story-box">
+        <div class="story-speaker" id="story-speaker">STEVE</div>
+        <p id="story-text">The village is quiet. Too quiet.</p>
+        <div class="story-actions"><button class="btn btn-ghost" id="btn-story-skip">SKIP</button><button class="btn" id="btn-story-next">CONTINUE</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RESULTS ===================== -->
+  <section id="screen-results" class="screen hidden">
+    <div class="results-wrap">
+      <div class="results-kicker" id="results-kicker">MATCH COMPLETE</div>
+      <h2 id="results-title">STEVE WINS</h2>
+      <div class="results-sub" id="results-sub">FLAWLESS VICTORY</div>
+      <div class="results-stats" id="results-stats"></div>
+      <div class="results-actions" id="results-actions">
+        <button class="btn btn-hero" id="btn-results-next">CONTINUE</button>
+        <button class="btn" id="btn-results-rematch">REMATCH</button>
+        <button class="btn btn-ghost" id="btn-results-menu">MAIN MENU</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PAUSE ===================== -->
+  <section id="screen-pause" class="screen hidden">
+    <div class="pause-box">
+      <h2>PAUSED</h2>
+      <button class="btn" id="btn-resume">RESUME</button>
+      <button class="btn" id="btn-pause-restart">RESTART MATCH</button>
+      <button class="btn" id="btn-pause-settings">SETTINGS</button>
+      <button class="btn btn-ghost" id="btn-pause-quit">QUIT TO MENU</button>
+      <div class="pause-hint">ESC / ENTER TO RESUME</div>
+    </div>
+  </section>
+
+  <!-- ===================== ARCADE / SURVIVAL INTERMISSION ===================== -->
+  <section id="screen-intermission" class="screen hidden">
+    <div class="intermission-box">
+      <div class="inter-kicker" id="inter-kicker">ARCADE</div>
+      <h2 id="inter-title">NEXT OPPONENT</h2>
+      <canvas id="inter-portrait" width="240" height="220"></canvas>
+      <div class="inter-name" id="inter-name">CREEPER</div>
+      <div class="inter-desc" id="inter-desc">A hissing nightmare with a short fuse.</div>
+      <div class="inter-stats" id="inter-stats"></div>
+      <button class="btn btn-hero" id="btn-inter-next">FIGHT</button>
+      <button class="btn btn-ghost" id="btn-inter-quit">QUIT</button>
+    </div>
+  </section>
+
+  <!-- ===================== GAME OVER ===================== -->
+  <section id="screen-gameover" class="screen hidden">
+    <div class="gameover-box">
+      <h2 id="gameover-title">YOU DIED</h2>
+      <div class="gameover-sub" id="gameover-sub">The corruption spreads...</div>
+      <div class="gameover-stats" id="gameover-stats"></div>
+      <button class="btn btn-hero" id="btn-gameover-retry">TRY AGAIN</button>
+      <button class="btn btn-ghost" id="btn-gameover-menu">MAIN MENU</button>
+    </div>
+  </section>
+
+  <!-- ===================== ENDING ===================== -->
+  <section id="screen-ending" class="screen hidden">
+    <div class="ending-box">
+      <div class="ending-kicker" id="ending-kicker">STORY COMPLETE</div>
+      <h2>THE WORLD REBUILT</h2>
+      <p id="ending-text">The corruption recedes. Steve and Alex place the final block...</p>
+      <div class="ending-credits">MINECRAFT: BLOCK BRAWL<br><small>A fan-made fighting game</small></div>
+      <button class="btn btn-hero" id="btn-ending-menu">RETURN TO MENU</button>
+    </div>
+  </section>
+
+  <!-- ===================== MOBILE CONTROLS ===================== -->
+  <div id="mobile-controls" class="hidden">
+    <div class="mc-left">
+      <button class="mc dpad up" data-key="jump">▲</button>
+      <button class="mc dpad left" data-key="left">◀</button>
+      <button class="mc dpad right" data-key="right">▶</button>
+      <button class="mc dpad down" data-key="crouch">▼</button>
+    </div>
+    <div class="mc-right">
+      <button class="mc small" data-key="block">BLOCK</button>
+      <button class="mc small" data-key="build">BUILD</button>
+      <button class="mc light" data-key="light">LIGHT</button>
+      <button class="mc heavy" data-key="heavy">HEAVY</button>
+      <button class="mc special" data-key="special">SPECIAL</button>
+      <button class="mc ult" data-key="ultimate">ULT</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <div id="rotate-hint">Rotate your device for the best blocky experience.</div>
+</div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
