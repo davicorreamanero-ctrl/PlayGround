@@ -1,4 +1,4 @@
-import { TILE, T } from './world.js';
+import { TILE, T, STREET } from './world.js';
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -220,6 +220,8 @@ export class Player {
       this.updateClimb(dt, input);
     } else if (this.state === 'ceiling') {
       this.updateCeiling(dt, input);
+    } else if (this.state === 'ladder') {
+      this.updateLadder(dt, input);
     } else {
       this.updateGround(dt, input);
     }
@@ -256,6 +258,14 @@ export class Player {
   }
 
   updateGround(dt, input) {
+    // Shaft ladders connect the sewers, subway and street. Hold up/down while
+    // inside a shaft to climb; the rungs are rendered by the world renderer.
+    const shaft = this.shaftAt();
+    if (shaft && (input.moveY < -0.25 || input.moveY > 0.25)) {
+      this.startLadder(shaft);
+      this.updateLadder(dt, input);
+      return;
+    }
     const speed = (this.crouch ? 95 : 215) * (this.level >= 3 ? 0.92 : 1) * (this.camoActive ? 1.08 : 1);
     const target = input.moveX * speed;
     this.vx = lerp(this.vx, target, this.grounded ? 0.32 : 0.13);
@@ -293,6 +303,58 @@ export class Player {
     this.trail(dt);
     if (this.vy > 0) this.grounded = false;
     if (this.grounded && prevGrounded) this.lastSafe = { x: this.x, y: this.y };
+  }
+
+  shaftAt() {
+    const shafts = this.game.world.shafts || [];
+    const top = STREET * TILE;
+    const bottom = 102 * TILE;
+    for (const s of shafts) {
+      const x0 = s.x * TILE, x1 = (s.x + s.w) * TILE;
+      if (this.x > x0 - 2 && this.x < x1 + 2 && this.y >= top - 2 && this.y <= bottom + 2) return s;
+    }
+    return null;
+  }
+
+  startLadder(s) {
+    this.state = 'ladder';
+    this.grounded = false;
+    this.vx = 0; this.vy = 0;
+    const x0 = s.x * TILE, x1 = (s.x + s.w) * TILE;
+    this.x = clamp(this.x, x0 + this.w / 2, x1 - this.w / 2);
+    this.game.particles.slime(this.x, this.y - this.h / 2, 0);
+  }
+
+  updateLadder(dt, input) {
+    const s = this.shaftAt();
+    if (!s) { this.state = 'normal'; return; }
+    const x0 = s.x * TILE, x1 = (s.x + s.w) * TILE;
+    const top = STREET * TILE, bottom = 102 * TILE;
+    this.vx = 0;
+    if (this.y <= top + 1 && input.moveY <= 0.25) {
+      // Step off the ladder onto the sidewalk instead of hovering in the hole.
+      this.y = top;
+      this.vy = 0;
+      this.vx = input.moveX * 190;
+      this.moveHorizontal(dt);
+      if (this.feetBlocked()) { this.state = 'normal'; this.grounded = true; }
+      return;
+    }
+    this.vy = input.moveY * 150;
+    this.moveVertical(dt);
+    this.x = clamp(this.x, x0 + this.w / 2, x1 - this.w / 2);
+    if (this.y >= bottom) {
+      this.y = bottom;
+      this.state = 'normal';
+      this.grounded = true;
+      this.vy = 0;
+    }
+    if (Math.abs(input.moveX) > 0.55) {
+      this.state = 'normal';
+      this.vx = input.moveX * 170;
+      this.vy = 0;
+    }
+    this.trail(dt);
   }
 
   startClimb(side) {
@@ -812,8 +874,8 @@ export class Player {
     }
 
     if (this.state === 'ceiling') ctx.scale(1, -1);
-    const bodyH = this.state === 'climb' ? h * 0.8 : h * 0.44 * crouchScale;
-    const bodyW = this.state === 'climb' ? w * 0.45 : w * 0.62;
+    const bodyH = (this.state === 'climb' || this.state === 'ladder') ? h * 0.8 : h * 0.44 * crouchScale;
+    const bodyW = (this.state === 'climb' || this.state === 'ladder') ? w * 0.45 : w * 0.62;
     const sway = Math.sin(this.anim * 3) * 2;
 
     // trailing tentacles

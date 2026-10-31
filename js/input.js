@@ -190,6 +190,7 @@ export class Input {
     if (action === 'camo') return this._pressed('camo') || this.touch.pressed.has('camo');
     if (action === 'tendrils') return this._pressed('tendrils') || this.touch.pressed.has('tendrils');
     if (action === 'zip') return this._pressed('zip') || this.touch.pressed.has('zip');
+    if (action === 'interact') return this._pressed('interact') || this.touch.pressed.has('consume');
     return this._pressed(action);
   }
 

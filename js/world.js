@@ -190,8 +190,10 @@ export class World {
     for (let x = 0; x < COLS; x++) {
       this.set(x, 91, T.SEWER);
       this.set(x, 102, T.SEWER);
+      // Support pillars hang from the ceiling instead of sealing the tunnel.
+      // Keeping the lower 5 rows open lets every biomass form crawl through.
       if (x % 17 === 0) {
-        for (let y = 92; y <= 101; y++) this.set(x, y, T.SEWER);
+        for (let y = 92; y <= 96; y++) this.set(x, y, T.SEWER);
       }
     }
     // sewer water strip
@@ -204,7 +206,8 @@ export class World {
       for (let y = 86; y <= 101; y++) this.set(x, y, T.BG_SUBWAY);
       this.set(x, 85, T.SUBWAY);
       this.set(x, 102, T.SUBWAY);
-      if (x % 23 === 0) for (let y = 87; y <= 100; y++) this.set(x, y, T.METAL);
+      // Subway columns leave a walkable gap along the rails.
+      if (x % 23 === 0) for (let y = 87; y <= 96; y++) this.set(x, y, T.METAL);
     }
     // subway rails / platforms
     for (let x = 150; x < 480; x++) {
@@ -227,6 +230,12 @@ export class World {
       this.fill(cx, cy - 1, cx + w, cy - 1, T.SEWER);
       this.fill(cx - 1, cy, cx - 1, cy + h, T.SEWER);
       this.fill(cx + w + 1, cy, cx + w + 1, cy + h, T.SEWER);
+      // Break doorways in both chamber walls so the room is enterable from the
+      // main sewer and does not seal the tunnel for players arriving from the left.
+      for (let y = cy + h - 2; y <= cy + h; y++) {
+        this.set(cx - 1, y, T.EMPTY);
+        this.set(cx + w + 1, y, T.EMPTY);
+      }
       if (kind === 'cache') this.special.push({ type: 'cache', x: (cx + w / 2) * TILE, y: (cy + h + 1) * TILE, district: 'underground' });
       if (kind === 'lab') this.special.push({ type: 'note', note: 2, x: (cx + 2) * TILE, y: (cy + h + 1) * TILE, district: 'underground' });
       if (kind === 'armory') this.propSpawns.push({ type: 'ammoCrate', x: (cx + 2) * TILE, y: (cy + h + 1) * TILE, district: 'underground' });
@@ -259,6 +268,9 @@ export class World {
     for (let y = 73; y <= 101; y++) {
       for (let x = sx; x < sx + w; x++) this.set(x, y, bg);
     }
+    // Open the street surface above the shaft. Without this the sidewalk
+    // tile caps the ladder and the sewer has no exit.
+    for (let x = sx; x < sx + w; x++) this.set(x, 72, T.EMPTY);
     this.set(sx - 1, 72, T.SIDEWALK); this.set(sx + w, 72, T.SIDEWALK);
     this.shafts.push({ x: sx, w, basement });
     // ladder rungs drawn by renderer
@@ -337,7 +349,12 @@ export class World {
       // stair gap
       const gap = x + 3 + Math.floor(r() * (w - 8));
       this.set(gap, row, T.EMPTY); this.set(gap + 1, row, T.EMPTY);
-      // little railing light
+    }
+    // Service/elevator shaft along the west wall: aligned floor holes let the
+    // organism climb between floors using the wall instead of needing a zip.
+    for (const row of floorRows) {
+      this.set(x + 1, row, T.EMPTY);
+      this.set(x + 2, row, T.EMPTY);
     }
     // windows on side walls
     const allFloors = [top + 2, ...floorRows];
@@ -445,9 +462,10 @@ export class World {
     this.special.push({ type: 'note', note: 3, x: (ax + 2) * TILE, y: (STREET - 1) * TILE, district: 'mall' });
     this.special.push({ type: 'cache', x: (ax + 8) * TILE, y: (top + 22) * TILE, district: 'mall' });
     this.special.push({ type: 'camo', x: (x + w - 4) * TILE, y: (top + 12) * TILE, district: 'mall' });
-    // hidden basement lab
+    // hidden basement lab with its own ventilation shaft down to the sewers
     this.carveRoom(x + 8, 74, 14, 6, T.BG_LAB);
-    this.special.push({ type: 'note', note: 4, x: (x + 10) * TILE, y: 79 * TILE, district: 'mall' });
+    this.carveShaft(x + 9, 2, true, T.BG_LAB);
+    this.special.push({ type: 'note', note: 4, x: (x + 12) * TILE, y: 79 * TILE, district: 'mall' });
     this.special.push({ type: 'cache', x: (x + 18) * TILE, y: 79 * TILE, district: 'mall' });
     this.humanSpawns.push({ type: 'survivor', x: (x + 20) * TILE, y: 79 * TILE, district: 'mall', indoors: true });
   }
@@ -460,7 +478,8 @@ export class World {
         if (xx === x + 5 || xx === x + 6) this.set(xx, y, T.METAL);
       }
     }
-    this.propSpawns.push({ type: 'evidenceServer', x: (x + w - 6) * TILE, y: (top + 20) * TILE, district: 'police', mission: 'police' });
+    // Rest the server on the nearest solid floor slab (row 66 for the precinct).
+    this.propSpawns.push({ type: 'evidenceServer', x: (x + w - 6) * TILE, y: (top + 26) * TILE, district: 'police', mission: 'police' });
     this.propSpawns.push({ type: 'armory', x: (x + 4) * TILE, y: (top + 12) * TILE, district: 'police' });
     this.special.push({ type: 'note', note: 5, x: (x + 6) * TILE, y: (top + 28) * TILE, district: 'police' });
     this.special.push({ type: 'cache', x: (x + w - 4) * TILE, y: (top + 8) * TILE, district: 'police' });
@@ -471,7 +490,7 @@ export class World {
   decorateResearch(d, r) {
     const { x, w, top } = d;
     for (let i = 0; i < 3; i++) {
-      this.propSpawns.push({ type: 'containmentNode', x: (x + 5 + i * 9) * TILE, y: (top + 22) * TILE, district: 'research', node: i, mission: 'research' });
+      this.propSpawns.push({ type: 'containmentNode', x: (x + 5 + i * 9) * TILE, y: (top + 23) * TILE, district: 'research', node: i, mission: 'research' });
     }
     this.propSpawns.push({ type: 'labConsole', x: (x + w / 2) * TILE, y: (top + 30) * TILE, district: 'research', mission: 'research' });
     this.special.push({ type: 'note', note: 1, x: (x + 4) * TILE, y: (top + 10) * TILE, district: 'research' });
@@ -487,8 +506,8 @@ export class World {
 
   decoratePower(d, r) {
     const { x, w, top } = d;
-    this.propSpawns.push({ type: 'reactorConsole', x: (x + w / 2) * TILE, y: (top + 16) * TILE, district: 'power', mission: 'power' });
-    for (let i = 0; i < 3; i++) this.propSpawns.push({ type: 'generator', x: (x + 3 + i * 5) * TILE, y: (top + 8) * TILE, district: 'power' });
+    this.propSpawns.push({ type: 'reactorConsole', x: (x + w / 2) * TILE, y: (top + 18) * TILE, district: 'power', mission: 'power' });
+    for (let i = 0; i < 3; i++) this.propSpawns.push({ type: 'generator', x: (x + 3 + i * 5) * TILE, y: (top + 10) * TILE, district: 'power' });
     this.lights.push({ x: (x + w / 2) * TILE, y: (top + 4) * TILE, r: 200, color: 'rgba(255,150,60,ALPHA)', glow: 0.1, strength: 0.65, flicker: true });
     for (let y = top + 4; y < STREET - 2; y += 7) {
       this.set(x + 2, y, T.HAZARD); this.set(x + w - 3, y, T.HAZARD);
@@ -604,7 +623,7 @@ export class World {
     // notes at ground
     this.special.push({ type: 'note', note: 1, x: 10 * TILE, y: 97 * TILE, district: 'outskirts' });
     // mission consoles
-    this.propSpawns.push({ type: 'transitConsole', x: 202 * TILE, y: 99 * TILE, district: 'underground', mission: 'subway' });
+    this.propSpawns.push({ type: 'transitConsole', x: 202 * TILE, y: 102 * TILE, district: 'underground', mission: 'subway' });
     this.propSpawns.push({ type: 'containmentConsole', x: 444 * TILE, y: 80 * TILE, district: 'research', mission: 'research' });
   }
 }

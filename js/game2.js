@@ -1,5 +1,6 @@
 import { Game } from './game.js';
 import { DISTRICTS, TILE, STREET } from './world.js';
+import { Helicopter } from './entities.js';
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
@@ -399,7 +400,7 @@ Game.prototype.completeMission = function () {
 };
 
 Game.prototype.showEndingChoice = function () {
-  if (this.endingShown) return;
+  if (this.endingShown || this.state === 'dead') return;
   this.endingShown = true;
   this.state = 'endingChoice';
   this.paused = true;

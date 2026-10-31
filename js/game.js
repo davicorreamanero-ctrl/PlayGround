@@ -287,8 +287,8 @@ export class Game {
     }
     // bosses
     const apc = new Boss(this, 'apc', 410 * TILE, STREET * TILE);
-    const aegis = new Boss(this, 'aegis', 444 * TILE, 71 * TILE);
-    const omega = new Boss(this, 'omega', 592 * TILE, 71 * TILE);
+    const aegis = new Boss(this, 'aegis', 444 * TILE, STREET * TILE);
+    const omega = new Boss(this, 'omega', 592 * TILE, STREET * TILE);
     this.bosses = { apc, aegis, omega };
     if (mode !== 'survival') {
       this.enemies.push(apc, aegis, omega);
@@ -303,6 +303,7 @@ export class Game {
       this.player.maxHp = 220; this.player.hp = 220;
       this.player.abilities.spit = true; this.player.abilities.tendrils = false;
       this.threat = 4;
+      this.threatLevel = 4;
     }
     this.camera.x = clamp(sx - 480, 0, this.world.width - 960);
     this.camera.y = clamp(sy - 320, 0, this.world.height - 540);
@@ -520,7 +521,8 @@ export class Game {
       const run = {
         mode: this.mode, seed: this.seed, missionIndex: this.missionIndex, flags: this.flags,
         notes: [...this.notesFound], caches: [...this.cachesFound], threat: this.threat,
-        player: { level: this.player.level, xp: this.player.xp, hp: this.player.hp, maxHp: this.player.maxHp, x: this.player.x, y: this.player.y },
+        player: { level: this.player.level, xp: this.player.xp, hp: this.player.hp, maxHp: this.player.maxHp, x: this.player.x, y: this.player.y,
+          camo: !!this.player.abilities.camo },
         stats: this.stats, survivalWave: this.survivalWave, survivalScore: this.survivalScore,
       };
       localStorage.setItem('carrionCityRun', JSON.stringify(run));
@@ -547,12 +549,13 @@ export class Game {
         this.player.maxHp = run.player.maxHp || this.player.maxHp;
         this.player.x = run.player.x || this.player.x;
         this.player.y = run.player.y || this.player.y;
+        if (run.player.camo) this.player.abilities.camo = true;
         this.camera.x = clamp(this.player.x - 480, 0, this.world.width - 960);
         this.camera.y = clamp(this.player.y - 320, 0, this.world.height - 540);
       }
       for (const p of this.pickups) {
         if (p.type === 'note' && this.notesFound.has(p.note)) p.taken = true;
-        if (p.type === 'cache') p.taken = true;
+        if (p.type === 'cache' && this.cachesFound.has(`${Math.round(p.x)},${Math.round(p.y)}`)) p.taken = true;
       }
       if (this.mode === 'story') { this.state = 'playing'; this.hideScreens(); }
       this.saveRun();
@@ -720,7 +723,43 @@ export class Game {
     this.saveRun();
   }
   onMissionPropDestroyed(prop) {
-    if (prop.type === 'checkpointGate') this.flags.gate = true;
+    // Mission consoles can also be smashed instead of overridden. Both routes
+    // must advance the objective or a feral playthrough softlocks the story.
+    if (prop.type === 'transitConsole') this.resolveSubway();
+    else if (prop.type === 'evidenceServer') this.resolvePolice();
+    else if (prop.type === 'reactorConsole') this.resolvePower();
+    else if (prop.type === 'checkpointGate') this.flags.gate = true;
+  }
+  resolveSubway() {
+    if (this.flags.subway) return;
+    this.flags.subway = true;
+    this.notify('TRANSIT LOCKDOWN DISABLED — SUBWAY OPEN', 'threat');
+    this.addSubtitle('The trains stop trying to leave. The tunnels belong to you now.', 3.5);
+    this.addThreat(0.25);
+    this.saveRun();
+  }
+  resolvePolice() {
+    if (this.flags.police) return;
+    this.flags.police = true;
+    this.notify('EVIDENCE SERVER DESTROYED — PRECINCT BLIND', 'threat');
+    this.addSubtitle('Fourteen recordings, gone. The city will remember anyway.', 3.5);
+    this.addThreat(0.25);
+    this.saveRun();
+  }
+  resolvePower() {
+    if (this.flags.power) return;
+    this.flags.power = true;
+    this.flags.harborOpen = true;
+    this.notify('REACTOR OVERLOADED — HARBOR BLOCKADE OFFLINE', 'boss');
+    this.addSubtitle('The grid dies. The harbor gates grind open. Something enormous is breathing in the dark.', 4.5);
+    this.addThreat(0.4);
+    this.shake(12);
+    // open harbor barriers
+    for (const p of this.props) {
+      if (p.alive && p.type === 'concreteBarrier' && p.x > 586 * TILE) p.destroy(this, 0, -1);
+    }
+    setTimeout(() => { if (this.bosses?.omega?.dormant) this.bosses.omega.activate(); }, 1200);
+    this.saveRun();
   }
   onBossKilled(boss) {
     this.stats.kills++;
@@ -800,16 +839,10 @@ export class Game {
     this.particles.sparks(x, y, 10, '#8ee8f2');
     this.audio.sfx('pickup', x, y);
     if (best.type === 'transitConsole') {
-      this.flags.subway = true;
-      this.notify('TRANSIT LOCKDOWN DISABLED — SUBWAY OPEN', 'threat');
-      this.addSubtitle('The trains stop trying to leave. The tunnels belong to you now.', 3.5);
-      this.addThreat(0.25);
+      this.resolveSubway();
       best.alive = false;
     } else if (best.type === 'evidenceServer') {
-      this.flags.police = true;
-      this.notify('EVIDENCE SERVER DESTROYED — PRECINCT BLIND', 'threat');
-      this.addSubtitle('Fourteen recordings, gone. The city will remember anyway.', 3.5);
-      this.addThreat(0.25);
+      this.resolvePolice();
       best.destroy(this, 0, -1);
     } else if (best.type === 'labConsole') {
       this.notify('HELIX ARCHIVE UNSEALED — HIDDEN LAB MARKED', 'evolution');
@@ -817,18 +850,8 @@ export class Game {
       this.addThreat(0.1);
       this.flashScreen(0.2);
     } else if (best.type === 'reactorConsole') {
-      this.flags.power = true;
-      this.flags.harborOpen = true;
-      this.notify('REACTOR OVERLOADED — HARBOR BLOCKADE OFFLINE', 'boss');
-      this.addSubtitle('The grid dies. The harbor gates grind open. Something enormous is breathing in the dark.', 4.5);
-      this.addThreat(0.4);
       this.flashScreen(0.4);
-      this.shake(12);
-      // open harbor barriers
-      for (const p of this.props) {
-        if (p.alive && p.type === 'concreteBarrier' && p.x > 586 * TILE) p.destroy(this, 0, -1);
-      }
-      setTimeout(() => { if (this.bosses?.omega?.dormant) this.bosses.omega.activate(); }, 1200);
+      this.resolvePower();
     } else if (best.type === 'armory') {
       this.player.hp = Math.min(this.player.maxHp, this.player.hp + 28);
       this.player.energy = this.player.maxEnergy;
