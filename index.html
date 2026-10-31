@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0e13" />
+  <meta name="description" content="Minecraft: Block Brawl — a pixel-art 2D fighting game inspired by Mortal Kombat and Street Fighter." />
+  <title>Minecraft: Block Brawl</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="game" width="640" height="360" aria-label="Minecraft Block Brawl game screen"></canvas>
+
+    <div id="ui">
+      <!-- MAIN MENU -->
+      <section id="screen-menu" class="screen active" aria-label="Main menu">
+        <div class="menu-grid">
+          <div class="menu-main">
+            <div class="logo">
+              <div class="logo-minecraft"><span class="cube"></span>MINECRAFT</div>
+              <h1 class="logo-title">BLOCK<span>BRAWL</span></h1>
+              <div class="logo-rule"></div>
+              <p class="logo-tag">PIXEL COMBAT ACROSS THE DIMENSIONS</p>
+            </div>
+            <nav class="menu-buttons" id="main-menu-buttons">
+              <button class="btn btn-primary" data-menu="versus"><b>VERSUS</b><small>1P vs CPU &middot; local 2P</small></button>
+              <button class="btn" data-menu="arcade"><b>ARCADE</b><small>6-stage ladder &middot; final boss</small></button>
+              <button class="btn" data-menu="story"><b>STORY</b><small>the corruption chronicles</small></button>
+              <button class="btn" data-menu="survival"><b>SURVIVAL</b><small>endless waves</small></button>
+              <button class="btn" data-menu="training"><b>TRAINING</b><small>lab &middot; combos &middot; no damage</small></button>
+              <button class="btn btn-ghost" data-menu="settings"><b>SETTINGS</b><small>audio &middot; difficulty &middot; display</small></button>
+            </nav>
+            <div class="menu-hint">↑ ↓ / W S &nbsp;SELECT &nbsp;&middot;&nbsp; ENTER / CLICK &nbsp;CONFIRM</div>
+          </div>
+          <aside class="menu-aside">
+            <div class="roster-strip" id="menu-roster"></div>
+            <div class="menu-card">
+              <div class="menu-card-head">FIGHTER ROSTER</div>
+              <p>Steve. Alex. Herobrine. Nine fighters, four arenas, two bosses. Build, block, combo and finish.</p>
+              <div class="menu-stats">
+                <span><b id="menu-roster-count">9</b> FIGHTERS</span>
+                <span><b>4</b> ARENAS</span>
+                <span><b>2</b> BOSSES</span>
+              </div>
+            </div>
+          </aside>
+        </div>
+        <footer class="menu-footer">
+          <span class="tag">v1.0 &middot; FAN-MADE TRIBUTE</span>
+          <span class="tag gold">A/D MOVE &middot; W JUMP &middot; J/K ATTACK &middot; L SPECIAL &middot; I BLOCK &middot; SPACE ULTIMATE</span>
+          <span class="tag" id="save-badge">LOCAL SAVE</span>
+        </footer>
+      </section>
+
+      <!-- CHARACTER SELECT / LOBBY -->
+      <section id="screen-select" class="screen" aria-label="Character select">
+        <header class="topbar">
+          <button class="btn btn-small btn-ghost" data-back="menu">◀ BACK</button>
+          <div class="topbar-title"><span id="select-mode-kicker">VERSUS</span><h2 id="select-mode-title">CHOOSE YOUR FIGHTER</h2></div>
+          <div class="topbar-right"><span class="chip" id="select-mode-chip">VS CPU</span></div>
+        </header>
+        <div class="select-body">
+          <div class="select-left">
+            <div class="roster" id="roster"></div>
+            <div class="pick-row">
+              <div class="pick-card" id="pick-p1">
+                <span class="pick-label">PLAYER 1</span>
+                <span class="pick-name" id="pick-p1-name">SELECT</span>
+                <span class="pick-sub" id="pick-p1-sub">keyboard</span>
+              </div>
+              <button class="pick-swap" id="pick-swap" title="Switch active player">⇄</button>
+              <div class="pick-card" id="pick-p2">
+                <span class="pick-label" id="pick-p2-label">PLAYER 2 / CPU</span>
+                <span class="pick-name" id="pick-p2-name">SELECT</span>
+                <span class="pick-sub" id="pick-p2-sub">CPU</span>
+              </div>
+            </div>
+          </div>
+          <aside class="select-right">
+            <div class="preview-frame">
+              <canvas id="preview-canvas" width="280" height="240"></canvas>
+              <div class="preview-scan"></div>
+              <div class="preview-tag" id="preview-tag">FIGHTER</div>
+            </div>
+            <div class="fighter-info">
+              <div class="fighter-heading">
+                <div>
+                  <h3 id="fighter-name">STEVE</h3>
+                  <p id="fighter-style">The Balanced Builder</p>
+                </div>
+                <span class="secret-badge" id="fighter-secret">SECRET</span>
+              </div>
+              <p class="fighter-desc" id="fighter-desc"></p>
+              <div class="stat-grid" id="fighter-stats"></div>
+              <div class="move-list" id="fighter-moves"></div>
+            </div>
+          </aside>
+        </div>
+        <footer class="select-footer">
+          <div class="arena-picker">
+            <span class="footer-label">ARENA</span>
+            <div class="arena-options" id="arena-options"></div>
+          </div>
+          <div class="select-actions">
+            <label class="toggle"><input type="checkbox" id="toggle-cpu" checked /><span>CPU OPPONENT</span></label>
+            <select id="difficulty-select" class="select-input" title="CPU difficulty">
+              <option value="easy">EASY</option>
+              <option value="normal" selected>NORMAL</option>
+              <option value="hard">HARD</option>
+            </select>
+            <button class="btn btn-go" id="start-battle" disabled>ENTER THE ARENA ▶</button>
+          </div>
+        </footer>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="screen-settings" class="screen" aria-label="Settings">
+        <header class="topbar">
+          <button class="btn btn-small btn-ghost" data-back="menu">◀ BACK</button>
+          <div class="topbar-title"><span>OPTIONS</span><h2>SETTINGS</h2></div>
+          <div class="topbar-right"><span class="chip">AUTO-SAVED</span></div>
+        </header>
+        <div class="settings-body">
+          <div class="panel">
+            <h3>AUDIO</h3>
+            <label class="range-row">MUSIC <input id="set-music" type="range" min="0" max="100" value="55" /><span id="set-music-val">55</span></label>
+            <label class="range-row">SFX <input id="set-sfx" type="range" min="0" max="100" value="70" /><span id="set-sfx-val">70</span></label>
+            <label class="check-row"><input type="checkbox" id="set-announcer" checked /> ANNOUNCER / IMPACT CALLOUTS</label>
+          </div>
+          <div class="panel">
+            <h3>GAMEPLAY</h3>
+            <div class="seg-row"><span>CPU DIFFICULTY</span>
+              <div class="seg" id="set-difficulty">
+                <button data-diff="easy">EASY</button>
+                <button data-diff="normal" class="active">NORMAL</button>
+                <button data-diff="hard">HARD</button>
+              </div>
+            </div>
+            <label class="check-row"><input type="checkbox" id="set-shake" checked /> SCREEN SHAKE</label>
+            <label class="check-row"><input type="checkbox" id="set-damage" checked /> DAMAGE NUMBERS</label>
+            <label class="check-row"><input type="checkbox" id="set-blood" checked /> IMPACT PARTICLES</label>
+            <label class="check-row"><input type="checkbox" id="set-scanlines" checked /> CRT SCANLINES</label>
+          </div>
+          <div class="panel">
+            <h3>CONTROLS</h3>
+            <div class="controls-table">
+              <div><b>P1</b><span>A / D move · W jump · S crouch · J light · K heavy · L special · 1/2/3 specials · I block · U build · SPACE ultimate</span></div>
+              <div><b>P2</b><span>← / → move · ↑ jump · ↓ crouch · , light · . heavy · / special · R-SHIFT block · \ build · ENTER ultimate</span></div>
+              <div><b>MENU</b><span>ESC pause / back · arrows navigate · ENTER confirm</span></div>
+              <div><b>BUILD</b><span>U barrier · S+U platform. 3 builds per round, limited duration.</span></div>
+            </div>
+            <button class="btn btn-small" id="reset-save">RESET LOCAL PROGRESS</button>
+          </div>
+        </div>
+        <footer class="settings-footer"><span>Settings are stored locally in your browser.</span><button class="btn btn-small" data-back="menu">DONE</button></footer>
+      </section>
+
+      <!-- RESULTS -->
+      <section id="screen-results" class="screen" aria-label="Results">
+        <div class="results-body">
+          <div class="results-kicker" id="results-kicker">MATCH COMPLETE</div>
+          <h2 class="results-title" id="results-title">STEVE WINS</h2>
+          <div class="results-sub" id="results-sub">FLAWLESS VICTORY</div>
+          <div class="results-portrait"><canvas id="results-canvas" width="180" height="180"></canvas></div>
+          <div class="results-stats" id="results-stats"></div>
+          <div class="results-buttons" id="results-buttons"></div>
+        </div>
+      </section>
+
+      <!-- STORY / DIALOGUE -->
+      <section id="screen-dialogue" class="screen" aria-label="Story dialogue">
+        <div class="dialogue-scene">
+          <div class="dialogue-chapter" id="dialogue-chapter">CHAPTER I</div>
+          <div class="dialogue-title" id="dialogue-title">THE CORRUPTION</div>
+          <div class="dialogue-portraits" id="dialogue-portraits"></div>
+          <div class="dialogue-box">
+            <div class="dialogue-speaker" id="dialogue-speaker">STEVE</div>
+            <p class="dialogue-text" id="dialogue-text"></p>
+            <div class="dialogue-actions">
+              <button class="btn btn-small btn-ghost" id="dialogue-skip">SKIP CUTSCENE</button>
+              <button class="btn btn-small" id="dialogue-next">NEXT ▶</button>
+            </div>
+            <div class="dialogue-dots" id="dialogue-dots"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAUSE -->
+      <section id="screen-pause" class="screen" aria-label="Pause menu">
+        <div class="pause-panel">
+          <div class="pause-kicker">COMBAT SUSPENDED</div>
+          <h2>PAUSED</h2>
+          <div class="pause-buttons">
+            <button class="btn btn-primary" id="pause-resume">RESUME</button>
+            <button class="btn" id="pause-restart">RESTART MATCH</button>
+            <button class="btn" id="pause-controls">CONTROLS</button>
+            <button class="btn btn-ghost" id="pause-quit">QUIT TO MENU</button>
+          </div>
+          <div class="pause-controls" id="pause-controls-list">
+            <div><b>MOVE</b> A / D</div><div><b>JUMP</b> W</div><div><b>CROUCH</b> S</div>
+            <div><b>LIGHT</b> J</div><div><b>HEAVY</b> K</div><div><b>SPECIAL</b> L / 1 2 3</div>
+            <div><b>BLOCK</b> I</div><div><b>BUILD</b> U</div><div><b>ULTIMATE</b> SPACE</div>
+          </div>
+          <div class="pause-tip" id="pause-tip">TIP: Hold I to block. Heavy attacks chip your guard — don't turtle forever.</div>
+        </div>
+      </section>
+
+      <!-- ARCADE LADDER -->
+      <section id="screen-ladder" class="screen" aria-label="Arcade ladder">
+        <div class="ladder-body">
+          <div class="ladder-kicker" id="ladder-kicker">ARCADE</div>
+          <h2 id="ladder-title">THE GAUNTLET</h2>
+          <div class="ladder-track" id="ladder-track"></div>
+          <p class="ladder-sub" id="ladder-sub">Defeat all challengers. The Ender Dragon awaits.</p>
+          <div class="ladder-actions">
+            <button class="btn btn-primary" id="ladder-next">CONTINUE ▶</button>
+            <button class="btn btn-ghost" id="ladder-quit">QUIT</button>
+          </div>
+        </div>
+      </section>
+
+      <div id="toast" role="status"></div>
+    </div>
+
+    <!-- MOBILE CONTROLS -->
+    <div id="touch-controls" aria-hidden="true">
+      <div class="touch-left">
+        <button class="tbtn tmove" data-touch="left">◀</button>
+        <button class="tbtn tmove" data-touch="right">▶</button>
+        <button class="tbtn tsmall" data-touch="up">▲</button>
+        <button class="tbtn tsmall" data-touch="down">▼</button>
+      </div>
+      <div class="touch-right">
+        <button class="tbtn tact" data-touch="light">LIGHT<small>J</small></button>
+        <button class="tbtn tact" data-touch="heavy">HEAVY<small>K</small></button>
+        <button class="tbtn tact" data-touch="special">S·1<small>L</small></button>
+        <button class="tbtn tact" data-touch="sp2">S·2<small>1</small></button>
+        <button class="tbtn tact" data-touch="sp3">S·3<small>2</small></button>
+        <button class="tbtn tact tblock" data-touch="block">BLOCK<small>I</small></button>
+        <button class="tbtn tact" data-touch="build">BUILD<small>U</small></button>
+        <button class="tbtn tact tult" data-touch="ult">ULT<small>␣</small></button>
+      </div>
+      <button class="tbtn tpause" id="touch-pause">II</button>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
