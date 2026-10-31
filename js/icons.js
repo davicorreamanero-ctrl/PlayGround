@@ -1,0 +1,36 @@
+// Elementos de interface — ícones vetoriais em PT-BR
+export const ICON = {
+  uniforme: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M22 10l10 5 10-5 10 8-5 9-4-2v29H21V25l-4 2-5-9z"/><path d="M32 15v34M25 30h14"/></svg>`,
+  coturno: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M20 8h12v19c0 5 3 8 8 9l12 3v11H12V37c0-4 3-7 8-7z"/><path d="M20 25h12M12 50h40M22 8v17"/></svg>`,
+  equipamento: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M10 22h44v28H10z"/><path d="M10 30h44M24 22v-5a5 5 0 015-5h6a5 5 0 015 5v5M26 36h12"/></svg>`,
+  ordem: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M16 6h26l8 8v44H16z"/><path d="M42 6v9h8M24 24h20M24 33h20M24 42h13"/></svg>`,
+  cafe: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 24h32v18a10 10 0 01-10 10H22a10 10 0 01-10-10z"/><path d="M44 29h5a6 6 0 010 12h-5M8 56h44M20 17c0-4 4-4 4-8M30 17c0-4 4-4 4-8"/></svg>`,
+  rifle: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 38l38-20 5 3-25 23-8-1-6 6-5-5 6-6z"/><path d="M28 27l10 9M40 32l7-4"/></svg>`,
+  cinto: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="6" y="25" width="52" height="14" rx="3"/><rect x="28" y="22" width="13" height="20" rx="2"/><path d="M34 29v7"/></svg>`,
+  cantil: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M22 14h20v8l5 7v25a6 6 0 01-6 6H23a6 6 0 01-6-6V29l5-7z"/><path d="M26 10h12v4H26zM28 28h8"/></svg>`,
+  radio: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="16" y="12" width="32" height="44" rx="3"/><path d="M42 4l-6 8M24 20h16M26 30h12v10H26zM26 46h12"/></svg>`,
+  lanterna: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M22 8h20l4 12v8H18v-8z"/><path d="M24 8V4h16v4M18 28h30M24 28v28h16V28"/></svg>`,
+  documento: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="14" y="8" width="36" height="48" rx="2"/><circle cx="28" cy="24" r="6"/><path d="M20 38c2-5 5-7 8-7s6 2 8 7M38 20h8M38 28h8M22 46h20"/></svg>`,
+  celular: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="20" y="6" width="24" height="52" rx="4"/><path d="M28 12h8M30 51h4"/></svg>`,
+  book: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M8 12h20a6 6 0 016 6v34a6 6 0 00-6-6H8z"/><path d="M56 12H36a6 6 0 00-6 6v34a6 6 0 016-6h20z"/></svg>`,
+  broom: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M40 6l18 18M46 14L20 40M14 46l10-10 14 14-10 10-6-2z"/></svg>`,
+  bed: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M6 46V22h52v24M6 34h52M6 46v8M58 46v8"/><path d="M12 22v12M22 22h14"/></svg>`,
+  cup: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 20h28v22a8 8 0 01-8 8H22a8 8 0 01-8-8z"/><path d="M42 26h4a5 5 0 010 10h-4M12 56h40"/></svg>`,
+  sun: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="32" cy="32" r="12"/><path d="M32 4v8M32 52v8M4 32h8M52 32h8M12 12l6 6M46 46l6 6M52 12l-6 6M18 46l-6 6"/></svg>`,
+  cloud: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M16 46a10 10 0 010-20 13 13 0 0124-6 12 12 0 018 26z"/></svg>`,
+  rain: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M16 34a10 10 0 010-20 13 13 0 0124-6 12 12 0 018 26H16z"/><path d="M20 42l-3 10M33 42l-3 10M46 42l-3 10"/></svg>`,
+  fog: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M10 22h44M6 32h44M16 42h42M10 52h30"/></svg>`,
+  wind: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 24h32a8 8 0 10-8-8M6 36h44a8 8 0 11-8 8M6 46h22"/></svg>`,
+  storm: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M14 32a9 9 0 010-18 12 12 0 0122-5 11 11 0 017 23H14z"/><path d="M34 36l-8 14h9l-5 10"/></svg>`,
+  snow: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M32 6v52M10 19l44 26M54 19L10 45"/></svg>`,
+  moon: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M44 8a24 24 0 100 48 20 20 0 110-48z"/></svg>`,
+  shield: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M32 4l24 8v18c0 15-10 25-24 30C18 55 8 45 8 30V12z"/></svg>`,
+  clock: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="32" cy="32" r="25"/><path d="M32 16v18l12 8"/></svg>`,
+  arrow: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 32h36M36 18l14 14-14 14"/></svg>`,
+  eye: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 32s10-16 28-16 28 16 28 16-10 16-28 16S4 32 4 32z"/><circle cx="32" cy="32" r="7"/></svg>`,
+  warning: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M32 6L60 56H4z"/><path d="M32 22v16M32 46v2"/></svg>`,
+  star: `<svg viewBox="0 0 64 64" fill="currentColor"><path d="M32 3l7 19 20 1-16 13 5 20-16-11-16 11 5-20L5 23l20-1z"/></svg>`,
+  check: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 34l14 14 30-34"/></svg>`
+};
+
+export const WEATHER_ICON = { sol:'sun', nublado:'cloud', chuva:'rain', tempestade:'storm', neblina:'fog', frio:'wind', calor:'sun', noite:'moon' };

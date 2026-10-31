@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#171a10" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>SERVIÇO DE GUARDA — 24 HORAS</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="view" aria-label="Visão do quartel"></canvas>
+    <div id="vignette"></div>
+    <div id="weather-fx"></div>
+    <div id="eyelids"><div class="lid top"></div><div class="lid bottom"></div></div>
+    <div id="flash"></div>
+
+    <!-- ================= MENU ================= -->
+    <section id="menu" class="screen active">
+      <div class="menu-scrim"></div>
+      <div class="menu-inner">
+        <header class="menu-header">
+          <div class="crest" aria-hidden="true">
+            <svg viewBox="0 0 64 64"><path d="M32 3l24 8v18c0 15-10 25-24 32C18 54 8 44 8 29V11z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M32 12l4 10 11 1-8 8 2 11-9-6-9 6 2-11-8-8 11-1z" fill="currentColor"/></svg>
+          </div>
+          <div class="menu-unit">
+            <span>1º BATALHÃO DE INFANTARIA</span>
+            <strong>BATALHÃO BOA VISTA</strong>
+          </div>
+          <div class="menu-status">
+            <span class="dot"></span> QUARTEL EM ATIVIDADE
+          </div>
+        </header>
+
+        <div class="menu-title">
+          <p class="kicker">SIMULADOR DE GUARDA DO EXÉRCITO BRASILEIRO</p>
+          <h1>SERVIÇO DE GUARDA</h1>
+          <div class="title-rule"><span></span><b>24 HORAS</b><span></span></div>
+          <p class="menu-sub">Da parada diária à dispensa. Uma jornada completa na guarda do quartel.</p>
+        </div>
+
+        <div class="menu-modes" id="menu-modes">
+          <button class="mode-card selected" data-mode="completo">
+            <span class="mode-tag">01</span>
+            <h3>SERVIÇO COMPLETO</h3>
+            <p>Cumpra as 24 horas de guarda: preparação, parada diária, rendição, permanência, toras, sentinelas e dispensa.</p>
+            <span class="mode-meta">JORNADA COMPLETA · AVALIAÇÃO FINAL</span>
+          </button>
+          <button class="mode-card" data-mode="livre">
+            <span class="mode-tag">02</span>
+            <h3>EXPLORAÇÃO LIVRE</h3>
+            <p>Circule pelas áreas autorizadas do batalhão, converse com a tropa e conheça a rotina da guarda sem escala.</p>
+            <span class="mode-meta">SEM PRESSÃO · CONVERSA E AMBIENTE</span>
+          </button>
+          <button class="mode-card" data-mode="campanha">
+            <span class="mode-tag">03</span>
+            <h3>CAMPANHA MILITAR</h3>
+            <p>Três serviços consecutivos com escalas, climas e inspeções diferentes. Seu conceito fica registrado na ficha.</p>
+            <span class="mode-meta" id="campaign-meta">0 DE 3 SERVIÇOS CONCLUÍDOS</span>
+          </button>
+        </div>
+
+        <div class="menu-actions">
+          <button id="btn-start" class="btn btn-primary btn-xl">INICIAR SERVIÇO <span class="arrow">›</span></button>
+          <button id="btn-help" class="btn btn-ghost">COMO JOGAR</button>
+          <button id="btn-settings" class="btn btn-ghost">AJUSTES</button>
+        </div>
+
+        <footer class="menu-footer">
+          <span>ESCALA · PERMANÊNCIA · SENTINELA · TORA</span>
+          <span class="mono">TOQUE PARA COMEÇAR</span>
+        </footer>
+      </div>
+    </section>
+
+    <!-- ================= BRIEFING ================= -->
+    <section id="briefing" class="screen">
+      <div class="panel wide briefing-panel">
+        <div class="panel-head">
+          <div>
+            <p class="kicker">ORDEM DE SERVIÇO Nº 214/2026</p>
+            <h2>BRIEFING DO SERVIÇO</h2>
+          </div>
+          <button class="btn btn-icon" data-close="briefing" aria-label="Voltar">✕</button>
+        </div>
+        <div class="briefing-grid">
+          <div class="briefing-col">
+            <h3>CONFIGURAÇÃO DA GUARDA</h3>
+            <label class="field">
+              <span>Escala de sentinela</span>
+              <select id="cfg-scale">
+                <option value="padrao">Padrão — 2h de posto / 2h de permanência</option>
+                <option value="alternada">Alternada — 1h30 de posto / 1h30 de permanência</option>
+                <option value="reforcada">Reforçada — 1h de posto / 1h de permanência</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Condição climática</span>
+              <select id="cfg-weather">
+                <option value="auto">Automática — variação durante o serviço</option>
+                <option value="limpo">Céu limpo — calor à tarde</option>
+                <option value="chuva">Chuva e vento</option>
+                <option value="neblina">Neblina e frio</option>
+                <option value="tempestade">Tempestade</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Rigor da inspeção</span>
+              <select id="cfg-strict">
+                <option value="normal">Normal — sargento de dia</option>
+                <option value="rigoroso">Rigoroso — oficiais na ronda</option>
+                <option value="brando">Brando — serviço de instrução</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Ritmo do relógio</span>
+              <select id="cfg-pace">
+                <option value="1">Normal — 1 minuto de jogo por segundo</option>
+                <option value="2" selected>Acelerado — 2 minutos por segundo</option>
+                <option value="4">Rápido — 4 minutos por segundo</option>
+              </select>
+            </label>
+          </div>
+          <div class="briefing-col">
+            <h3>DADOS DA ESCALA</h3>
+            <div class="dossier">
+              <div class="dossier-row"><span>MILITAR</span><strong>SD EP SILVA</strong></div>
+              <div class="dossier-row"><span>SUBDIVISÃO</span><strong>1ª CIA — 2º PELOTÃO</strong></div>
+              <div class="dossier-row"><span>FUNÇÃO</span><strong>SENTINELA DA GUARDA</strong></div>
+              <div class="dossier-row"><span>INÍCIO</span><strong>07h00 — SÁBADO, 31 OUT</strong></div>
+              <div class="dossier-row"><span>TÉRMINO</span><strong>07h30 — DOMINGO, 01 NOV</strong></div>
+              <div class="dossier-row"><span>POSTOS</span><strong>P1 · P2 · P3 · P4</strong></div>
+            </div>
+            <div class="notice-box">
+              <b>RECOMENDAÇÕES DO CABO DA GUARDA</b>
+              <p>Apresente-se com o uniforme completo e o coturno engraxado. Confira o material antes de assumir o posto. Toda ocorrência deve ser comunicada ao cabo ou ao sargento de dia.</p>
+            </div>
+            <div class="checkline"><span>☑</span> Escala publicada no quadro do Corpo da Guarda</div>
+            <div class="checkline"><span>☑</span> Material conferido pelo militar anterior</div>
+          </div>
+        </div>
+        <div class="panel-foot">
+          <button class="btn btn-ghost" data-close="briefing">VOLTAR</button>
+          <button id="btn-briefing-start" class="btn btn-primary">ASSUMIR A ESCALA <span class="arrow">›</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PREPARAÇÃO ================= -->
+    <section id="prep" class="screen">
+      <div class="prep-wrap">
+        <div class="prep-top">
+          <div>
+            <p class="kicker">DOMICÍLIO DO MILITAR · SÁBADO, 31 DE OUTUBRO</p>
+            <h2>PREPARAÇÃO DO UNIFORME</h2>
+          </div>
+          <div class="prep-clock">
+            <span>HORÁRIO</span>
+            <strong id="prep-clock">06:10</strong>
+            <em id="prep-arrival">PREVISÃO DE CHEGADA: 07:02</em>
+          </div>
+        </div>
+
+        <div class="prep-body">
+          <div class="prep-list" id="prep-list">
+            <button class="prep-task" data-task="uniforme">
+              <span class="prep-ico" id="ico-uniforme"></span>
+              <span class="prep-txt"><b>Uniforme</b><small>Separar gandola, calça, cinto e quepe</small></span>
+              <span class="prep-state" data-state="uniforme">PENDENTE</span>
+            </button>
+            <button class="prep-task" data-task="coturno">
+              <span class="prep-ico" id="ico-coturno"></span>
+              <span class="prep-txt"><b>Coturno</b><small>Limpar e engraxar para a inspeção</small></span>
+              <span class="prep-state" data-state="coturno">PENDENTE</span>
+            </button>
+            <button class="prep-task" data-task="equipamento">
+              <span class="prep-ico" id="ico-equipamento"></span>
+              <span class="prep-txt"><b>Equipamento</b><small>Conferir material de serviço e documentos</small></span>
+              <span class="prep-state" data-state="equipamento">PENDENTE</span>
+            </button>
+            <button class="prep-task" data-task="ordem">
+              <span class="prep-ico" id="ico-ordem"></span>
+              <span class="prep-txt"><b>Ordem de serviço</b><small>Ler a escala e o horário de apresentação</small></span>
+              <span class="prep-state" data-state="ordem">PENDENTE</span>
+            </button>
+            <button class="prep-task optional" data-task="cafe">
+              <span class="prep-ico" id="ico-cafe"></span>
+              <span class="prep-txt"><b>Café da manhã</b><small>Opcional — 6 minutos</small></span>
+              <span class="prep-state" data-state="cafe">OPCIONAL</span>
+            </button>
+          </div>
+
+          <div class="prep-stage">
+            <div class="bed">
+              <div class="bed-label">UNIFORME 3º A · SERVIÇO DE GUARDA</div>
+              <div id="prep-stage-content">
+                <div class="prep-intro">
+                  <p class="kicker">ESCALAÇÃO</p>
+                  <h3>VOCÊ FOI ESCALADO.</h3>
+                  <p>A mensagem chegou ontem à noite: <b>serviço de guarda de 24 horas</b>, com apresentação às 07h00 no Corpo da Guarda do 1º Batalhão.</p>
+                  <p>Organize seu material com calma. A pontualidade e a apresentação fazem parte da avaliação.</p>
+                  <div class="stamp">CONFIDENCIAL<br><small>ESCALA INTERNA</small></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prep-foot">
+          <div class="prep-tip" id="prep-tip">Selecione uma tarefa ao lado para começar a preparação.</div>
+          <div class="prep-actions">
+            <button id="btn-prep-leave" class="btn btn-primary btn-lg" disabled>SEGUIR PARA O QUARTEL <span class="arrow">›</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= GAME HUD ================= -->
+    <section id="game">
+      <div id="hud">
+        <div class="hud-top">
+          <div class="clock-box">
+            <span id="hud-day">SÁBADO · 31 OUT</span>
+            <strong id="hud-clock">07:00</strong>
+            <em id="hud-service">SERVIÇO: 24H</em>
+          </div>
+          <div class="objective-box">
+            <span class="objective-tag">OBJETIVO ATUAL</span>
+            <strong id="hud-objective">Apresentar-se no Corpo da Guarda</strong>
+            <span id="hud-objective-sub">Dirija-se à permanência e fale com o cabo da guarda.</span>
+            <div class="objective-bar"><i id="hud-objective-bar"></i></div>
+          </div>
+          <div class="weather-box">
+            <div id="hud-weather-icon" class="weather-ico"></div>
+            <div><strong id="hud-temp">24°C</strong><span id="hud-weather">SOL</span></div>
+            <button id="btn-pause" class="hud-icon-btn" aria-label="Pausar">II</button>
+          </div>
+        </div>
+
+        <div class="hud-left">
+          <div class="stat" data-stat="fatigue">
+            <span>FADIGA</span><div class="bar"><i></i></div><b>10</b>
+          </div>
+          <div class="stat" data-stat="attention">
+            <span>ATENÇÃO</span><div class="bar"><i></i></div><b>90</b>
+          </div>
+          <div class="stat" data-stat="stress">
+            <span>ESTRESSE</span><div class="bar"><i></i></div><b>15</b>
+          </div>
+          <div class="stat" data-stat="morale">
+            <span>MORAL</span><div class="bar"><i></i></div><b>80</b>
+          </div>
+        </div>
+
+        <div class="hud-right">
+          <button class="hud-btn" id="btn-schedule"><span>ESCALA</span><small>JORNADA</small></button>
+          <button class="hud-btn" id="btn-map"><span>MAPA</span><small>QUARTEL</small></button>
+          <button class="hud-btn" id="btn-radio"><span>RÁDIO</span><small>CANAL 3</small></button>
+        </div>
+
+        <div id="hud-location"><span class="loc-dot"></span><span id="location-name">PORTÃO PRINCIPAL</span></div>
+        <div id="hud-next"><span>PRÓXIMO COMPROMISSO</span><b id="next-label">PARADA DIÁRIA · 07:20</b></div>
+
+        <div id="interaction-prompt">
+          <kbd id="prompt-key">E</kbd>
+          <span id="prompt-text">Falar com o Cabo Andrade</span>
+        </div>
+
+        <div id="radio-banner">
+          <span class="radio-pulse"></span>
+          <div><b>CHAMADO NO RÁDIO</b><small id="radio-banner-text">Central de operações chamando o Posto 1</small></div>
+          <button id="btn-answer-radio" class="btn btn-mini">ATENDER</button>
+        </div>
+
+        <div id="toasts"></div>
+        <div id="subtitle-bar"><span id="subtitle-text"></span></div>
+
+        <!-- SENTRY MODE -->
+        <div id="sentry-hud" class="hidden">
+          <div class="sentry-head">
+            <span>POSTO ASSUMIDO</span>
+            <strong id="sentry-post">P1 — PORTÃO PRINCIPAL</strong>
+          </div>
+          <div class="sentry-core">
+            <div class="attention-ring">
+              <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="43" class="ring-bg"/><circle id="ring-fg" cx="50" cy="50" r="43" class="ring-fg"/></svg>
+              <div><b id="sentry-attention">100</b><span>ATENÇÃO</span></div>
+            </div>
+            <div class="sentry-info">
+              <div><span>TEMPO NO POSTO</span><b id="sentry-elapsed">00:00</b></div>
+              <div><span>RENDIÇÃO EM</span><b id="sentry-remaining">02:00:00</b></div>
+              <div><span>CONDIÇÃO</span><b id="sentry-condition">VISIBILIDADE BOA</b></div>
+            </div>
+          </div>
+          <div class="sentry-actions">
+            <button id="btn-watch" class="btn btn-primary btn-watch">VIGIAR <small>mantenha a atenção</small></button>
+            <button id="btn-post-log" class="btn btn-ghost">OCORRÊNCIAS</button>
+          </div>
+          <div class="sentry-hint">Arraste para observar. Toque em VIGIAR para varrer o setor e espantar o sono.</div>
+        </div>
+
+        <!-- TOUCH CONTROLS -->
+        <div id="touch" class="hidden">
+          <div id="joystick"><div id="joystick-knob"></div></div>
+          <div id="touch-look"></div>
+          <div class="touch-buttons">
+            <button id="btn-action" class="touch-action">AÇÃO</button>
+            <button id="btn-run" class="touch-run">CORRER</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= OVERLAYS ================= -->
+    <div id="modal-layer"></div>
+    <section id="schedule" class="screen">
+      <div class="panel wide schedule-panel">
+        <div class="panel-head">
+          <div><p class="kicker">CORPO DA GUARDA · QUADRO DE SERVIÇO</p><h2>ESCALA DE 24 HORAS</h2></div>
+          <button class="btn btn-icon" data-close="schedule" aria-label="Fechar">✕</button>
+        </div>
+        <div class="schedule-topline">
+          <div class="schedule-now"><span>AGORA</span><strong id="sch-clock">07:00</strong><em id="sch-date">SÁBADO, 31 OUT</em></div>
+          <div class="schedule-remain"><span>RESTAM</span><strong id="sch-remain">24h00</strong><em>PARA O TÉRMINO DO SERVIÇO</em></div>
+          <div class="schedule-status"><span>SITUAÇÃO</span><strong id="sch-status">EM SERVIÇO</strong><em id="sch-post">POSTO: PERMANÊNCIA</em></div>
+        </div>
+        <div class="schedule-cols">
+          <div id="schedule-list" class="schedule-list"></div>
+          <div class="schedule-side">
+            <h3>QUADRO DE AVISOS</h3>
+            <div class="notice-mini"><b>MATERIAL</b><p>Fuzil IA2, rádio, lanterna, coldre e cantil. Conferir numeração na rendição.</p></div>
+            <div class="notice-mini"><b>RÁDIO</b><p>Canal 3 — Central de Operações. Procedimento: identificar o posto, escutar e confirmar.</p></div>
+            <div class="notice-mini"><b>ORDEM DO DIA</b><p>Revista de uniforme na parada. Tora às 13h00 no pátio. Refeições no rancho.</p></div>
+            <div class="schedule-buttons">
+              <button id="btn-wait" class="btn btn-ghost">AGUARDAR PRÓXIMO COMPROMISSO</button>
+              <button id="btn-schedule-map" class="btn btn-ghost">VER MAPA DO QUARTEL</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="map-screen" class="screen">
+      <div class="panel wide map-panel">
+        <div class="panel-head">
+          <div><p class="kicker">1º BATALHÃO DE INFANTARIA · ÁREAS AUTORIZADAS</p><h2>MAPA DO QUARTEL</h2></div>
+          <button class="btn btn-icon" data-close="map-screen" aria-label="Fechar">✕</button>
+        </div>
+        <div class="map-layout">
+          <canvas id="big-map" width="720" height="720"></canvas>
+          <div class="map-legend">
+            <h3>LEGENDA</h3>
+            <div class="legend-item"><i class="lg you"></i> Você</div>
+            <div class="legend-item"><i class="lg obj"></i> Objetivo atual</div>
+            <div class="legend-item"><i class="lg post"></i> Posto de sentinela</div>
+            <div class="legend-item"><i class="lg npc"></i> Militar</div>
+            <div class="legend-item"><i class="lg door"></i> Acesso</div>
+            <div class="legend-item"><i class="lg wall"></i> Edificação</div>
+            <hr>
+            <h3>POSTOS</h3>
+            <div class="post-line"><b>P1</b> Portão Principal</div>
+            <div class="post-line"><b>P2</b> Ala Norte / Depósito</div>
+            <div class="post-line"><b>P3</b> Ala Sul / Estacionamento</div>
+            <div class="post-line"><b>P4</b> Torre do Depósito</div>
+            <hr>
+            <p class="map-note">Deslocamento a pé. Mantenha-se nas áreas autorizadas e apresente-se no posto no horário da escala.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pause" class="screen">
+      <div class="panel pause-panel">
+        <p class="kicker">SERVIÇO EM ANDAMENTO</p>
+        <h2>PAUSA</h2>
+        <div class="pause-info"><span id="pause-objective">Permanência</span><b id="pause-clock">07:00</b></div>
+        <div class="pause-buttons">
+          <button id="btn-resume" class="btn btn-primary">RETOMAR SERVIÇO</button>
+          <button id="btn-pause-schedule" class="btn btn-ghost">CONSULTAR ESCALA</button>
+          <button id="btn-pause-help" class="btn btn-ghost">CONTROLES</button>
+          <button id="btn-pause-settings" class="btn btn-ghost">AJUSTES</button>
+          <button id="btn-abandon" class="btn btn-danger">ENCERRAR SERVIÇO</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="results" class="screen">
+      <div class="panel wide results-panel">
+        <div class="results-head">
+          <div>
+            <p class="kicker">1º BATALHÃO DE INFANTARIA · CORPO DA GUARDA</p>
+            <h2 id="results-title">SERVIÇO ENCERRADO</h2>
+            <p id="results-sub">Passagem de serviço concluída.</p>
+          </div>
+          <div class="concept-badge" id="concept-badge"><span>CONCEITO</span><strong>SATISFATÓRIO</strong></div>
+        </div>
+        <div class="results-body">
+          <div class="results-report">
+            <h3>PARTE DE SERVIÇO</h3>
+            <div id="results-scores"></div>
+            <div class="results-comment" id="results-comment"></div>
+          </div>
+          <div class="results-side">
+            <h3>DADOS DO SERVIÇO</h3>
+            <div class="dossier" id="results-dossier"></div>
+            <h3>OCORRÊNCIAS REGISTRADAS</h3>
+            <div id="results-occurrences" class="occ-list"></div>
+            <div class="results-buttons">
+              <button id="btn-results-menu" class="btn btn-primary">VOLTAR AO MENU</button>
+              <button id="btn-results-again" class="btn btn-ghost">REPETIR SERVIÇO</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= MODALS ================= -->
+    <div id="dialog-backdrop" class="hidden">
+      <div id="dialog" class="dialog">
+        <div class="dialog-head">
+          <div id="dialog-portrait" class="portrait"></div>
+          <div class="dialog-id">
+            <span id="dialog-rank">CABO</span>
+            <strong id="dialog-name">ANDRADE</strong>
+            <em id="dialog-role">CABO DA GUARDA</em>
+          </div>
+          <div id="dialog-timer" class="dialog-timer hidden"><i></i></div>
+        </div>
+        <div class="dialog-body">
+          <div id="dialog-context" class="dialog-context"></div>
+          <p id="dialog-text"></p>
+          <div id="dialog-choices" class="dialog-choices"></div>
+          <div id="dialog-checklist" class="dialog-checklist hidden"></div>
+        </div>
+        <div class="dialog-foot">
+          <button id="dialog-voice" class="btn btn-mini">OUVIR</button>
+          <span id="dialog-hint">Selecione uma opção</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="settings" class="screen">
+      <div class="panel settings-panel">
+        <div class="panel-head"><div><p class="kicker">PREFERÊNCIAS</p><h2>AJUSTES</h2></div><button class="btn btn-icon" data-close="settings">✕</button></div>
+        <div class="settings-grid">
+          <label class="field"><span>Volume geral</span><input id="set-volume" type="range" min="0" max="100" value="70"><output id="out-volume">70%</output></label>
+          <label class="field"><span>Vozes e comandos</span><select id="set-voice"><option value="on">Ativadas</option><option value="off">Desativadas</option></select></label>
+          <label class="field"><span>Velocidade do olhar</span><input id="set-sens" type="range" min="30" max="200" value="100"><output id="out-sens">100%</output></label>
+          <label class="field"><span>Qualidade da imagem</span><select id="set-quality"><option value="auto">Automática</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></label>
+          <label class="field"><span>Controles</span><select id="set-touch"><option value="auto">Automático (toque em telas touch)</option><option value="on">Mostrar controles de toque</option><option value="off">Somente teclado e mouse</option></select></label>
+          <label class="field"><span>Inclinação do aparelho</span><select id="set-tilt"><option value="off">Desativada</option><option value="on">Ativar (pede permissão no iOS)</option></select></label>
+          <label class="field"><span>Tela sempre ativa</span><select id="set-awake"><option value="on">Ativada</option><option value="off">Desativada</option></select></label>
+          <label class="field"><span>Subtítulos</span><select id="set-subs"><option value="on">Sempre visíveis</option><option value="off">Ocultar falas curtas</option></select></label>
+        </div>
+        <div class="panel-foot">
+          <button id="btn-settings-reset" class="btn btn-ghost">RESTAURAR PADRÃO</button>
+          <button class="btn btn-primary" data-close="settings">CONCLUIR</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="help" class="screen">
+      <div class="panel wide help-panel">
+        <div class="panel-head"><div><p class="kicker">MANUAL DO SOLDADO</p><h2>COMO JOGAR</h2></div><button class="btn btn-icon" data-close="help">✕</button></div>
+        <div class="help-grid">
+          <div>
+            <h3>DESLOCAMENTO</h3>
+            <p><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> ou setas para andar. <kbd>SHIFT</kbd> para correr. Arraste o mouse para olhar.</p>
+            <p>No celular: use o direcional à esquerda e arraste o lado direito da tela para olhar. O botão <b>AÇÃO</b> interage e o botão <b>CORRER</b> acelera o passo.</p>
+            <h3>INTERAÇÃO</h3>
+            <p><kbd>E</kbd> interage com militares, portas, quadro de serviço, rádio, beliche e postos. Aproxime-se e a opção aparece na parte inferior da tela.</p>
+            <h3>ESCALA E TEMPO</h3>
+            <p><kbd>TAB</kbd> abre a escala. <kbd>M</kbd> abre o mapa. <kbd>ESC</kbd> pausa. O relógio corre durante o serviço; diálogos e minigames pausam a contagem.</p>
+          </div>
+          <div>
+            <h3>REGRAS DA GUARDA</h3>
+            <ul class="rules">
+              <li>Apresente-se no posto no horário. Atrasos afetam a avaliação.</li>
+              <li>Não abandone o posto sem rendição. Toda ocorrência deve ser comunicada.</li>
+              <li>Na rendição, confira fuzil, rádio, lanterna e livro de ocorrências.</li>
+              <li>Use o procedimento de rádio: identifique o posto, escute e confirme com “câmbio”.</li>
+              <li>Durma apenas no descanso autorizado. A fadiga reduz a atenção e a concentração.</li>
+              <li>Compareça às refeições e à tora. Água e café ajudam, mas não substituem o descanso.</li>
+            </ul>
+            <h3>CONCEITOS</h3>
+            <div class="concept-row"><b class="exc">EXCELENTE</b><span>85 a 100 — serviço exemplar</span></div>
+            <div class="concept-row"><b class="sat">SATISFATÓRIO</b><span>65 a 84 — serviço regular</span></div>
+            <div class="concept-row"><b class="ins">INSUFICIENTE</b><span>abaixo de 65 — falhas graves</span></div>
+            <p class="help-note">O objetivo não é combater. É cumprir a rotina, manter a postura, comunicar-se corretamente e chegar ao fim das 24 horas sem faltas evitáveis.</p>
+          </div>
+        </div>
+        <div class="panel-foot"><button class="btn btn-primary" data-close="help">ENTENDIDO</button></div>
+      </div>
+    </div>
+
+    <div id="confirm" class="screen">
+      <div class="panel confirm-panel">
+        <p class="kicker">CONFIRMAÇÃO</p>
+        <h3 id="confirm-title">ENCERRAR O SERVIÇO?</h3>
+        <p id="confirm-text">O progresso desta guarda será perdido.</p>
+        <div class="panel-foot"><button id="confirm-no" class="btn btn-ghost">CANCELAR</button><button id="confirm-yes" class="btn btn-danger">CONFIRMAR</button></div>
+      </div>
+    </div>
+
+    <div id="rotate-hint" class="hidden">
+      <div class="rotate-inner"><span>↻</span><p>Para uma melhor experiência, use o aparelho na horizontal.</p><button id="btn-rotate-ok" class="btn btn-mini">CONTINUAR ASSIM</button></div>
+    </div>
+
+    <div id="loading" class="screen active">
+      <div class="load-inner">
+        <div class="crest small"><svg viewBox="0 0 64 64"><path d="M32 3l24 8v18c0 15-10 25-24 32C18 54 8 44 8 29V11z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M32 12l4 10 11 1-8 8 2 11-9-6-9 6 2-11-8-8 11-1z" fill="currentColor"/></svg></div>
+        <h2>1º BATALHÃO DE INFANTARIA</h2>
+        <p>ORGANIZANDO A GUARDA...</p>
+        <div class="load-bar"><i></i></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
