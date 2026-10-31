@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#07090c">
+<title>CARRION: CITY OF CHAOS</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <canvas id="game" width="960" height="540" aria-label="Carrion: City of Chaos game canvas"></canvas>
+  <div id="scanlines"></div>
+  <div id="vignette"></div>
+  <div id="flash"></div>
+
+  <div id="ui">
+    <!-- TITLE -->
+    <section id="title-screen" class="screen">
+      <div class="title-wrap">
+        <div class="eyebrow">A BIOLOGICAL CATASTROPHE</div>
+        <h1 class="title-glitch" data-text="CARRION">CARRION</h1>
+        <h2 class="subtitle">CITY <span>OF</span> CHAOS</h2>
+        <div class="title-rule"></div>
+        <p class="tagline">The city is meat. <span>You are hunger.</span></p>
+        <div class="menu">
+          <button class="btn primary" data-action="story"><span class="key">01</span> Story Mode <em>escape. consume. ascend.</em></button>
+          <button class="btn" data-action="freeroam"><span class="key">02</span> Free Roam <em>the whole city, unchained.</em></button>
+          <button class="btn" data-action="survival"><span class="key">03</span> Survival <em>endless containment waves.</em></button>
+          <button class="btn ghost" data-action="help"><span class="key">?</span> How To Play</button>
+        </div>
+        <div class="title-foot">
+          <span class="mature">MATURE 18+</span>
+          <span>GRAPHIC HORROR &amp; VIOLENCE</span>
+          <span id="audio-state">AUDIO: OFF — CLICK TO AWAKEN</span>
+        </div>
+        <div class="continue-row hidden" id="continue-row">
+          <button class="btn small" data-action="continue">CONTINUE LAST OUTBREAK</button>
+        </div>
+      </div>
+      <div class="title-side">
+        <div class="warning">
+          <b>CONTAINMENT BREACH</b>
+          <span>HELIX DIRECTIVE // SITE 09</span>
+          <span>STATUS: <i>UNCONTAINED</i></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTRO -->
+    <section id="intro-screen" class="screen hidden">
+      <div class="intro-card">
+        <div class="eyebrow">SITE 09 // 03:14 AM</div>
+        <h2>THE THING THAT GOT OUT</h2>
+        <div class="intro-body">
+          <p>They kept you in a glass box for eleven years. They fed you. They measured you. They called you <b>Specimen C-09</b> and wrote papers about the sounds you made while dying.</p>
+          <p>Tonight the glass broke. The drainage tunnel spat you into the rain, and for the first time the world above smells like <b>warm blood and open doors</b>.</p>
+          <p>Helix Directive is already moving. They built this city on top of their experiments. Somewhere under the harbor is the thing they were really afraid of.</p>
+          <p class="whisper">Find it. Eat the city on the way.</p>
+        </div>
+        <button class="btn primary big" data-action="begin">BEGIN THE OUTBREAK</button>
+        <div class="hint">Press <kbd>ENTER</kbd> to begin</div>
+      </div>
+    </section>
+
+    <!-- PAUSE -->
+    <section id="pause-screen" class="screen hidden">
+      <div class="panel">
+        <div class="eyebrow">THE CITY HOLDS ITS BREATH</div>
+        <h2>PAUSED</h2>
+        <div class="pause-stats" id="pause-stats"></div>
+        <div class="menu compact">
+          <button class="btn primary" data-action="resume">Resume</button>
+          <button class="btn" data-action="help">Controls</button>
+          <button class="btn" data-action="toggle-audio">Toggle Audio</button>
+          <button class="btn" data-action="toggle-shake">Screen Shake: ON</button>
+          <button class="btn ghost" data-action="quit">Abandon The City</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEATH -->
+    <section id="death-screen" class="screen hidden">
+      <div class="panel death-panel">
+        <div class="eyebrow">BIOMASS DEPLETED</div>
+        <h2 class="death-title">CONTAINED</h2>
+        <p id="death-text">They scraped what was left of you into a bag and called it a victory.</p>
+        <div class="menu compact">
+          <button class="btn primary" data-action="retry">Rise Again</button>
+          <button class="btn ghost" data-action="quit">Return To Title</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ENDING -->
+    <section id="ending-screen" class="screen hidden">
+      <div class="ending-card">
+        <div class="eyebrow" id="ending-eyebrow">THE CITY IS QUIET</div>
+        <h2 id="ending-title">ENDING</h2>
+        <p id="ending-text"></p>
+        <div class="ending-stats" id="ending-stats"></div>
+        <div class="menu compact">
+          <button class="btn primary" data-action="freeroam">Roam The Ruins</button>
+          <button class="btn ghost" data-action="quit">Return To Title</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOTE -->
+    <section id="note-screen" class="screen hidden">
+      <div class="note-card">
+        <div class="note-head"><span id="note-tag">RECOVERED DOCUMENT</span><span id="note-count">1 / 6</span></div>
+        <h2 id="note-title">SUBJECT C-09</h2>
+        <div id="note-body" class="note-body"></div>
+        <button class="btn primary" data-action="close-note">Absorb</button>
+      </div>
+    </section>
+
+    <!-- MAP -->
+    <section id="map-screen" class="screen hidden">
+      <div class="map-card">
+        <div class="map-head"><h2>CITY OVERVIEW</h2><span>PRESS TAB TO CLOSE</span></div>
+        <canvas id="map-canvas" width="880" height="360"></canvas>
+        <div class="map-legend">
+          <span><i class="dot player"></i>YOU</span>
+          <span><i class="dot objective"></i>OBJECTIVE</span>
+          <span><i class="dot note"></i>DOCUMENT</span>
+          <span><i class="dot cache"></i>BIOMASS</span>
+          <span><i class="dot boss"></i>THREAT</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- HELP -->
+    <section id="help-screen" class="screen hidden">
+      <div class="help-card">
+        <div class="eyebrow">THE ORGANISM</div>
+        <h2>HOW TO HUNT</h2>
+        <div class="help-grid">
+          <div>
+            <h3>MOVEMENT</h3>
+            <p><kbd>A</kbd><kbd>D</kbd> crawl &nbsp; <kbd>W</kbd><kbd>S</kbd> climb / descend</p>
+            <p><kbd>SPACE</kbd> leap &nbsp; <kbd>SHIFT</kbd> dash</p>
+            <p>Push into a wall and hold <kbd>W</kbd> to climb. At a ceiling, keep holding <kbd>W</kbd> to crawl across it.</p>
+            <p><kbd>S</kbd> while still squeezes through vents and gaps.</p>
+            <p><kbd>Q</kbd> fires a tendril at ceilings and yanks you across gaps.</p>
+          </div>
+          <div>
+            <h3>VIOLENCE</h3>
+            <p><kbd>J</kbd> / <kbd>LMB</kbd> tentacle whip</p>
+            <p><kbd>K</kbd> / <kbd>RMB</kbd> grab &amp; drag a victim</p>
+            <p><kbd>E</kbd> devour a corpse or grabbed prey</p>
+            <p><kbd>X</kbd> ground slam &nbsp; <kbd>F</kbd> spit biomass</p>
+            <p><kbd>R</kbd> spawn attack tendrils &nbsp; <kbd>C</kbd> camouflage</p>
+          </div>
+          <div>
+            <h3>THE CITY</h3>
+            <p>Kill and destroy to raise threat. The response escalates from police to tactical units, armor, helicopters and containment squads.</p>
+            <p>Consume biomass to grow. Bigger forms hit harder but cannot squeeze into tight vents.</p>
+            <p>Smash barrels, cars, walls, windows and barricades. The damage stays.</p>
+            <p><kbd>TAB</kbd> city map &nbsp; <kbd>ESC</kbd> pause &nbsp; <kbd>M</kbd> mute</p>
+          </div>
+        </div>
+        <button class="btn primary" data-action="close-help">Back</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- TOUCH -->
+  <div id="touch-ui" class="hidden">
+    <div id="stick-zone"><div id="stick"><div id="stick-knob"></div></div></div>
+    <div id="touch-buttons">
+      <button class="tbtn" data-touch="whip">J</button>
+      <button class="tbtn" data-touch="grab">K</button>
+      <button class="tbtn" data-touch="consume">E</button>
+      <button class="tbtn small" data-touch="jump">↑</button>
+      <button class="tbtn small" data-touch="dash">⇢</button>
+      <button class="tbtn small" data-touch="slam">X</button>
+      <button class="tbtn small" data-touch="spit">F</button>
+      <button class="tbtn small" data-touch="camo">C</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
